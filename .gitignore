@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+backend/datos/*.db
+backend/datos/*.db-shm
+backend/datos/*.db-wal
+backend/datos/respaldos/
+
+# Archivo de prueba que quedo suelto durante una sesion de soporte tecnico
+# (no tiene contenido real, se puede borrar del disco tranquilamente).
+backend/src/autenticacion/*.test

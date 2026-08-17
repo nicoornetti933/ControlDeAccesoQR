@@ -1,0 +1,38 @@
+# Configuracion de ejemplo de Nginx como proxy reverso + servidor de
+# archivos estaticos, pensada para un VPS (Hostinger, DigitalOcean,
+# cualquier proveedor con acceso root).
+#
+# Uso:
+#   1. Reemplazar "tudominio.com" por tu dominio real (en las dos lineas
+#      "server_name").
+#   2. Copiar este archivo a /etc/nginx/sites-available/sistema-control-acceso
+#   3. sudo ln -s /etc/nginx/sites-available/sistema-control-acceso /etc/nginx/sites-enabled/
+#   4. sudo nginx -t && sudo systemctl reload nginx
+#   5. sudo certbot --nginx -d tudominio.com   (genera el HTTPS real y
+#      reescribe este archivo automaticamente para redirigir a HTTPS)
+
+server {
+    listen 80;
+    server_name tudominio.com;
+
+    # El frontend se compila una sola vez ("npm run build" en frontend/)
+    # y Nginx sirve directamente los archivos estaticos resultantes.
+    root /var/www/sistema-control-acceso/frontend/dist;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    # Todo lo que empiece con /api se reenvia al backend de Node/Express,
+    # que sigue corriendo en el puerto interno 4000 (gestionado por pm2,
+    # ver ecosystem.config.cjs).
+    location /api/ {
+        proxy_pass http://127.0.0.1:4000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}

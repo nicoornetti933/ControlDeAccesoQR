@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#raiz {
+  height: 100%;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #f6f5ff;
+  color: #1f1b3a;
+}
+
+/* Clases reutilizables de UI, definidas una sola vez para mantener
+   coherencia visual en todo el sistema sin repetir combinaciones largas
+   de utilidades de Tailwind en cada componente. */
+@layer components {
+  .tarjeta {
+    @apply rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5;
+  }
+
+  .boton-primario {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-marca-600 px-4 py-2.5
+      font-semibold text-white shadow-sm transition hover:bg-marca-700
+      focus:outline-none focus:ring-2 focus:ring-marca-400 focus:ring-offset-2
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .boton-secundario {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2.5
+      font-semibold text-marca-700 ring-1 ring-marca-200 transition hover:bg-marca-50
+      focus:outline-none focus:ring-2 focus:ring-marca-400 focus:ring-offset-2
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .boton-peligro {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-rose-600 px-4 py-2.5
+      font-semibold text-white shadow-sm transition hover:bg-rose-700
+      focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2
+      disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .campo-formulario {
+    @apply w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900
+      shadow-sm transition placeholder:text-slate-400
+      focus:border-marca-400 focus:outline-none focus:ring-2 focus:ring-marca-100;
+  }
+
+  .etiqueta-formulario {
+    @apply mb-1.5 block text-sm font-medium text-slate-700;
+  }
+
+  .insignia {
+    @apply inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold;
+  }
+}
