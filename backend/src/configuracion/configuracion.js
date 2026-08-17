@@ -21,25 +21,36 @@ function obtenerVariableObligatoria(nombre, valorPorDefecto) {
   return valor;
 }
 
+const path = require('path');
+
 const configuracion = {
   entorno: process.env.NODE_ENV || 'desarrollo',
-  puerto: Number(process.env.PUERTO) || 4000,
+  // Ademas de la variable propia ("PUERTO"), se acepta "PORT": es el
+  // nombre que usan Render y la mayoria de los servicios de hosting para
+  // indicarle a la app en que puerto tiene que escuchar. Asi el sistema
+  // funciona en esos servicios sin tener que configurar nada extra.
+  puerto: Number(process.env.PUERTO || process.env.PORT) || 4000,
   jwt: {
     secreto: obtenerVariableObligatoria('JWT_SECRETO'),
     duracion: process.env.JWT_DURACION || '8h',
   },
   origenPermitido: process.env.ORIGEN_PERMITIDO || 'http://localhost:5173',
-  rutaBaseDeDatos: require('path').join(__dirname, '..', '..', 'datos', 'sistema.db'),
+  // Por defecto, la base de datos vive dentro de la carpeta del proyecto
+  // ("backend/datos/sistema.db"). En un hosting con disco efimero (como
+  // Render sin un "persistent disk"), ese archivo se borra en cada
+  // reinicio/despliegue. "RUTA_BASE_DATOS" permite apuntar el archivo a
+  // una ruta distinta (por ejemplo, un disco persistente montado en
+  // "/var/data") sin tocar el codigo. Ver despliegue/render.md.
+  rutaBaseDeDatos: process.env.RUTA_BASE_DATOS || path.join(__dirname, '..', '..', 'datos', 'sistema.db'),
   administradorInicial: {
     email: process.env.ADMIN_EMAIL_INICIAL || 'admin@sistema.local',
     password: process.env.ADMIN_PASSWORD_INICIAL || 'CambiarInmediatamente123!',
   },
   esProduccion: (process.env.NODE_ENV || 'desarrollo') === 'produccion',
   respaldos: {
-    // Carpeta donde se guardan las copias automaticas de la base de
-    // datos. Vive junto al archivo .db, dentro de "datos/", para que
-    // quede incluida si el usuario hace un backup manual de esa carpeta.
-    carpeta: require('path').join(__dirname, '..', '..', 'datos', 'respaldos'),
+    // Igual que "rutaBaseDeDatos": por defecto vive junto al .db, pero se
+    // puede redirigir a un disco persistente con "RUTA_CARPETA_RESPALDOS".
+    carpeta: process.env.RUTA_CARPETA_RESPALDOS || path.join(__dirname, '..', '..', 'datos', 'respaldos'),
     intervaloHoras: Number(process.env.RESPALDO_INTERVALO_HORAS) || 6,
     cantidadAConservar: Number(process.env.RESPALDO_CANTIDAD_A_CONSERVAR) || 30,
   },

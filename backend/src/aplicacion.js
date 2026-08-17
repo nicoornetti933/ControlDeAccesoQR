@@ -8,6 +8,8 @@
  * carpeta bajo src/ y se importa como un router independiente.
  */
 
+const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -55,6 +57,30 @@ app.use('/api', categoriasRutas); // define sus propios prefijos /eventos/:id/ca
 app.use('/api/codigos-qr', codigosQrRutas);
 app.use('/api/control-acceso', controlAccesoRutas);
 app.use('/api/registros', registrosRutas);
+
+// --- Frontend compilado (opcional) ---------------------------------------
+// Si existe "frontend/dist" (resultado de "npm run build" en el
+// frontend), el propio backend lo sirve como archivos estaticos. Esto
+// permite desplegar todo el sistema como un UNICO servicio (por ejemplo,
+// un solo Web Service en Render, ver despliegue/render.md): frontend y
+// backend quedan en el mismo origen, sin necesidad de configurar CORS ni
+// depender de que las cookies de sesion viajen entre dos subdominios
+// distintos. En desarrollo local esta carpeta no existe (se usa "npm run
+// dev" con el proxy de Vite en su lugar, ver vite.config.js), asi que
+// este bloque no hace nada y no afecta el flujo de trabajo habitual.
+const carpetaFrontendCompilado = path.join(__dirname, '..', '..', 'frontend', 'dist');
+if (fs.existsSync(carpetaFrontendCompilado)) {
+  app.use(express.static(carpetaFrontendCompilado));
+  // Cualquier ruta que no sea de la API se resuelve con index.html: es
+  // React Router, del lado del cliente, quien decide que pantalla
+  // mostrar segun la URL (patron estandar para SPAs).
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next(); // deja que caiga en "noEncontrado" de abajo
+    }
+    res.sendFile(path.join(carpetaFrontendCompilado, 'index.html'));
+  });
+}
 
 // --- Manejo de errores (siempre al final) --------------------------------
 app.use(noEncontrado);
